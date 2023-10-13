@@ -11,48 +11,73 @@ int px[PLAYER_MAX], py[PLAYER_MAX], period[PLAYER_MAX];  // 각 플레이어 위치, 이
 int young_x, young_y;
 
 bool pass_player[PLAYER_MAX] = { 0 };
-bool next_game = false;
+bool next_game;
+bool young_change = false;
 
-void mugungwha_init(void)
+
+
+void younghyee_print()
+{
+	young_x = n_player / 2 + 1.5; young_y = 1;
+
+	if (young_change == false) {
+		for (int i = 0; i < 3; i++) {
+			back_buf[young_x][young_y] = '#';
+			young_x++;
+		}
+	}
+	else {
+		for (int i = 0; i < 3; i++) {
+			back_buf[young_x][young_y] = '@';
+			young_x++;
+		}
+	}
+}
+
+void mugunghwa_init(void)
 {
 	map_init(n_player + 4, 60);
-	young_x = n_player / 2 + 1.5; young_y = 1;
-	//영희
-	for (int i = 0; i < 3; i++) {
-		back_buf[young_x][young_y] = '#';
-		young_x++;
-	}
-	
+
+	younghyee_print();
 
 	//canvas.c map_init에서 문자 #->*
 	int x = 2, y = N_COL - 2;
 	for (int i = 0; i < n_player; i++) {
-		if (pass_player[i] == true) continue;
+		if (pass_player[i] == true || player[i] == false) continue;
 		px[i] = x;
 		py[i] = y;
-		period[i] = randint(100, 500);
+		period[i] = randint(100, 400);
 
 		back_buf[px[i]][py[i]] = '0' + i; 
 		x++;
 	}
 }
 
-int get_rand()
+int get_rand(bool move, bool stop)
 {
-	
 	int random = rand();
 
 	double r = random / (double)RAND_MAX;
 	double dr = r * 100.0f;
 
-	double p[4] = { 10.0f, 10.0f, 10.0f, 70.0f };
+	double p1[4] = { 10.0f, 10.0f, 10.0f, 70.0f };
+	double p2[2] = { 10.0f, 90.0f };
 
 	double cumulative = 0.0f;
 
-	for (int i = 0; i < 4; i++) {
-		cumulative += p[i];
-		if (dr <= cumulative) {
-			return i;
+	if (move) {
+		for (int i = 0; i < 4; i++) {
+			cumulative += p1[i];
+
+			if (dr <= cumulative) return i;
+		}
+	}
+
+	if (stop) {
+		for (int i = 0; i < 2; i++) {
+			cumulative += p2[i];
+
+			if (dr <= cumulative) return i;
 		}
 	}
 }
@@ -60,19 +85,29 @@ int get_rand()
 void enemy_move_manual(int player) {
 	int p = player;
 	int nx, ny;  // 움직여서 다음에 놓일 자리
+	int dir;
 
 	// 각 방향으로 움직일 때 x, y값 delta
 	static int dx[4] = { -1, 1, 0, 0 };
 	static int dy[4] = { 0, 0, 0, -1 };
 
+	if (pass_player[p] == true || player == false) return;
 
-	int dir;
-	switch (get_rand()) {
-	case 0: dir = DIR_UP; break;
-	case 1: dir = DIR_DOWN; break;
-	case 2: dir = DIR_STAY; break;
-	case 3: dir = DIR_LEFT; break;
-	default: return;
+	if (young_change == true) {
+		switch (get_rand(0, 1)) {
+		case 0: dir = DIR_UP; break;
+		case 1: dir = DIR_STAY; break;
+		default: return;
+		}
+	}
+	else {
+		switch (get_rand(1, 0)) {
+		case 0: dir = DIR_UP; break;
+		case 1: dir = DIR_DOWN; break;
+		case 2: dir = DIR_STAY; break;
+		case 3: dir = DIR_LEFT; break;
+		default: return;
+		}
 	}
 
 	nx = px[p] + dx[dir];
@@ -82,53 +117,87 @@ void enemy_move_manual(int player) {
 	move_tail(p, nx, ny);
 }
 
-void say_mugunghwa(void)
+int s = 0;
+
+void Say_mugunghwa1()
 {
-	char say[] = "무궁화꽃이피었습니다";
+	char* say[100] = { "무", "궁", "화", "꽃", "이", "피", "었", "습", "니", "다" };
+	gotoxy(N_ROW, 0);
 
-	int skip = 0;
 
-	for (int i = 0; say[i] != '\0'; i++) {
-		putchar(say[i]);
-		
-		if (i == 11) {
-			skip = 1;
-			Sleep(600);
+	if (s >= 6 && s < 10) {
+		if (tick % 100 * s == 0) {
+			printf("%s ", say[s]);
+			s++;
+			tick = 0;
 		}
-		else if (skip == 1) {
-			if (i % 2 == 0) continue;
-			else Sleep(500 - (i / 2 - 6) * 100);
-		}
-		else {
-			if (i % 2 == 0) continue;
-			else Sleep(1000 + 200 * i);
-		}
-
 	}
-	Sleep(3000);
-
-	for (int i = 0; say[i] != '\0'; i++) {
-		putchar('\b');
-		putchar(' ');
-		putchar('\b');
+	else {
+		if (tick % (1000 + 200 * s) == 0) {
+			printf("%s ", say[s]);
+			s++;
+			tick = 0;
+		}
 	}
 
-	return say_mugunghwa();
+	if (s >= 10) {
+		young_change = true;
+		if (tick >= 2990) {
+			for (int i = 0; i < 30; i++) {	//도대체 이게 웨 필요한거임??????
+				putchar('\b');
+				putchar(' ');
+				putchar('\b');
+			}
+
+			s = 0;
+			tick = 0;
+			young_change = false;
+		}
+		else young_change = true;
+	}
+
+	/*young_change = true;
+	
+	young_change = false;*/
+
+}
+
+void younghyee()
+{
+	younghyee_print();
+
+}
+
+bool move_check(int p)
+{
+	if (front_buf[px[p]][py[p]] != back_buf[px[p]][py[p]]) {	//draw할때 이미 같아짐
+		player[p] = false;
+		px[p] = 0; py[p] = 0;
+
+		return player[p];
+	}
+}
+
+void behind_move(int p) 
+{
+
 }
 
 void mugunghwa(void)	
 {
 	srand((unsigned int)time(NULL));
 	next_game = false;
-	mugungwha_init();
-	
+
+	mugunghwa_init();
+
 	system("cls");
 	display();
-	
+
 	
 	while (1) {
-
-		//say_mugunghwa();	//작동하면 플레이어가 안움직임.
+		
+		Say_mugunghwa1();
+		younghyee_print();
 
 		// player 0만 손으로 움직임(4방향)
 		key_t key = get_key();
@@ -140,31 +209,40 @@ void mugunghwa(void)
 		}
 
 		// 확률 이동
-		// 너무 빠른거 같으면 ==0 으로 하ㅣㄱ
 		for (int i = 1; i < n_player; i++) {
 			if (tick % period[i] < 10) {
 				enemy_move_manual(i);
 			}
 		}
 
+		//0이 죽으면 맵에서 안사라짐
+		if (young_change == true) {
+			for (int i = 0; i < n_player; i++) {
+				move_check(i);
+			}
+		}
+		
+		//dialog();
+		display();
+		Sleep(10);
+		tick += 10;
+
+		
 		//플레이어 통과, 다음 게임으로
-		//0번이 통과하면 겜을 끝내야하나?
-		//? 한명이 통과를 하면 안움직이는데?
 		young_x = n_player / 2 + 1.5; young_y = 1;
 		for (int i = 0; i < n_player; i++) {
-			if ((px[i] == young_x + 3 || px[i] == young_x - 1 ) && py[i] == young_y ||
+			if ((px[i] == young_x + 3 || px[i] == young_x - 1) && py[i] == young_y ||
 				(py[i] == young_y + 1 && (px[i] == young_x || px[i] == young_x + 1 || px[i] == young_x + 2))) {
 				pass_player[i] = true;
+				px[i] = 0, py[i] = 0;
+
 				next_game = true;
 				Sleep(1500);
 			}
 		}
-		if (next_game == true) return mugunghwa();
-
-		display();
-		Sleep(10);
-		tick += 10;
+		if (next_game == true) { 
+			s = 0;
+			return mugunghwa(); 
+		}
 	}
-
-
 }
