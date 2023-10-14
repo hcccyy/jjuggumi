@@ -7,14 +7,17 @@
 #define DIR_STAY	2
 #define DIR_LEFT	3
 
-int px[PLAYER_MAX], py[PLAYER_MAX], period[PLAYER_MAX];  // 각 플레이어 위치, 이동 주기
-int young_x, young_y;
-
-bool pass_player[PLAYER_MAX] = { 0 };
 bool next_game;
+
+int px[PLAYER_MAX], py[PLAYER_MAX], period[PLAYER_MAX];  // 각 플레이어 위치, 이동 주기
+
+int young_x, young_y;
 bool young_change = false;
 
-
+bool pass_player[PLAYER_MAX] = { 0 };
+int death_count = 0;
+bool move_1 = false;
+bool move_player[PLAYER_MAX] = { 0 };
 
 void younghyee_print()
 {
@@ -61,7 +64,7 @@ int get_rand(bool move, bool stop)
 	double dr = r * 100.0f;
 
 	double p1[4] = { 10.0f, 10.0f, 10.0f, 70.0f };
-	double p2[2] = { 10.0f, 90.0f };
+	double p2[2] = { 10.0f, 90.0f};
 
 	double cumulative = 0.0f;
 
@@ -95,7 +98,7 @@ void enemy_move_manual(int player) {
 
 	if (young_change == true) {
 		switch (get_rand(0, 1)) {
-		case 0: dir = DIR_UP; break;
+		case 0: dir = DIR_LEFT; break;
 		case 1: dir = DIR_STAY; break;
 		default: return;
 		}
@@ -118,10 +121,9 @@ void enemy_move_manual(int player) {
 }
 
 int s = 0;
-
-void Say_mugunghwa1()
+void Say_mugunghwa()
 {
-	char* say[100] = { "무", "궁", "화", "꽃", "이", "피", "었", "습", "니", "다" };
+	char* say[10] = { "무", "궁", "화", "꽃", "이", "피", "었", "습", "니", "다" };
 	gotoxy(N_ROW, 0);
 
 
@@ -132,56 +134,54 @@ void Say_mugunghwa1()
 			tick = 0;
 		}
 	}
-	else {
-		if (tick % (1000 + 200 * s) == 0) {
+	else if (s < 6) {
+		if (tick % (800 + 200 * s) == 0) { 
 			printf("%s ", say[s]);
 			s++;
 			tick = 0;
 		}
 	}
 
-	if (s >= 10) {
+	if (s == 10) {
 		young_change = true;
 		if (tick >= 2990) {
-			for (int i = 0; i < 30; i++) {	//도대체 이게 웨 필요한거임??????
-				putchar('\b');
-				putchar(' ');
-				putchar('\b');
-			}
-
 			s = 0;
 			tick = 0;
 			young_change = false;
+			move_1 = false;
 		}
-		else young_change = true;
 	}
-
-	/*young_change = true;
-	
-	young_change = false;*/
-
 }
 
-void younghyee()
+bool behind_move(int p)
 {
-	younghyee_print();
+	int front, back;
+	for (int i = 0; i < n_player; i++) {
+		if (py[i] > py[p]) front = i, back = p;
+		else front = p, back = i;
 
+		if (i != p && px[front] == px[back]) {
+			if (front_buf[px[back]][py[back]] != back_buf[px[back]][py[back]]) {
+				player[back] = true;
+				move_player[back] = false;
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 bool move_check(int p)
 {
-	if (front_buf[px[p]][py[p]] != back_buf[px[p]][py[p]]) {	//draw할때 이미 같아짐
-		player[p] = false;
-		px[p] = 0; py[p] = 0;
+	move_player[p] = false;
 
-		return player[p];
+	if (front_buf[px[p]][py[p]] != back_buf[px[p]][py[p]]) {
+		if (behind_move(p) == true) return;
+		player[p] = false;
+		move_player[p] = true;
 	}
 }
 
-void behind_move(int p) 
-{
-
-}
 
 void mugunghwa(void)	
 {
@@ -196,7 +196,7 @@ void mugunghwa(void)
 	
 	while (1) {
 		
-		Say_mugunghwa1();
+		Say_mugunghwa();
 		younghyee_print();
 
 		// player 0만 손으로 움직임(4방향)
@@ -205,29 +205,55 @@ void mugunghwa(void)
 			break;
 		}
 		else if (key != K_UNDEFINED) {
+			if (player[0] == false) continue;
 			move_manual(key);
 		}
 
 		// 확률 이동
 		for (int i = 1; i < n_player; i++) {
-			if (tick % period[i] < 10) {
+			if (tick % period[i] < 10 && move_1 == false) {
 				enemy_move_manual(i);
 			}
 		}
 
-		//0이 죽으면 맵에서 안사라짐
-		if (young_change == true) {
+		// 영희가 뒤를 돌아봤을 때
+		if (young_change == true && move_1 == false) {
+			move_1 = true;		//한 번만 움직이게
+
 			for (int i = 0; i < n_player; i++) {
 				move_check(i);
 			}
+
+			for (int i = 0; i < n_player; i++) {
+				if (pass_player[i] == true) continue;
+				if (move_player[i] == true) {
+					death_count++;
+				}
+			}
 		}
-		
-		//dialog();
+
 		display();
 		Sleep(10);
 		tick += 10;
-
 		
+		if (young_change == true && death_count > 0) {
+			move_1 = false;
+			death_count = 0;
+
+			//dialog();
+
+			tick = 0;
+
+			for (int i = 0; i < n_player; i++) {
+				if (move_player[i] == true) {
+					back_buf[px[i]][py[i]] = ' ';
+					px[i] = 0; py[i] = 0;
+				}
+			}
+			continue;
+		}
+
+
 		//플레이어 통과, 다음 게임으로
 		young_x = n_player / 2 + 1.5; young_y = 1;
 		for (int i = 0; i < n_player; i++) {
@@ -240,9 +266,10 @@ void mugunghwa(void)
 				Sleep(1500);
 			}
 		}
-		if (next_game == true) { 
+
+		if (next_game == true) {
 			s = 0;
-			return mugunghwa(); 
+			return mugunghwa();
 		}
 	}
 }
