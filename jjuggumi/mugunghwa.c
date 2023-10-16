@@ -151,7 +151,6 @@ void Say_mugunghwa()
 			tick = 0;
 			young_change = false;
 			move_1 = false;
-			
 		}
 	}
 }
