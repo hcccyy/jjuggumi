@@ -124,11 +124,12 @@ int s = 0;
 void Say_mugunghwa()
 {
 	char* say[10] = { "¹«", "±Ã", "È­", "²É", "ÀÌ", "ÇÇ", "¾ú", "½À", "´Ï", "´Ù" };
-	gotoxy(N_ROW, 0);
+	//gotoxy(N_ROW, 0);
 
 
 	if (s >= 6 && s < 10) {
 		if (tick % 100 * s == 0) {
+			gotoxy(N_ROW, s * 2);
 			printf("%s ", say[s]);
 			s++;
 			tick = 0;
@@ -136,6 +137,7 @@ void Say_mugunghwa()
 	}
 	else if (s < 6) {
 		if (tick % (800 + 200 * s) == 0) { 
+			gotoxy(N_ROW, s*2);
 			printf("%s ", say[s]);
 			s++;
 			tick = 0;
@@ -149,6 +151,7 @@ void Say_mugunghwa()
 			tick = 0;
 			young_change = false;
 			move_1 = false;
+			
 		}
 	}
 }
