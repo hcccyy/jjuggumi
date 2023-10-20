@@ -19,12 +19,12 @@ int death_count = 0;
 bool move_1 = false;
 bool move_player[PLAYER_MAX] = { 0 };
 int alive_player=0;
+int died[PLAYER_MAX];
+int live_count = 0;
 
-
-void mugunghwa_dialog(int player) {
+void mugunghwa_dialog(int p[]) {
 	int i, j;
-	int p = player;
-
+	
 	for (i = DIALOG_DURATION_SEC; i > 0; i--) {
 		gotoxy(4, 10);
 
@@ -34,12 +34,15 @@ void mugunghwa_dialog(int player) {
 		printf("\n");
 
 		gotoxy(5, 10);
-		printf("  %d 탈락자명단:   %d \n", i, p);
 		
-		/*for (int j = 0; j < n_player; j++) {
-			if(move_player[j]==true)
-				printf(" %d ", j);
-		}*/
+		printf("  %d 탈락자명단:", i);
+		for (int k = 0; k < n_player; k++) {
+			if (p[k] != 0) {
+				printf(" %d ", p[k]);
+			}
+		}
+		printf("\n");
+
 
 		gotoxy(6, 10);
 		for (int j = 0; j < 30; j++) {
@@ -52,10 +55,45 @@ void mugunghwa_dialog(int player) {
 	for (j = 0; j < 3; j++) {
 		for (i = 4; i <= 6; i++) {
 			gotoxy(i, 10);
-			printf("                                    \n");
+			printf("                                 \n");
 		}
 	}
 }
+
+//void mugunghwa_dialog(int player) {
+//	int i, j;
+//	int p = player;
+//	for (i = DIALOG_DURATION_SEC; i > 0; i--) {
+//		gotoxy(4, 10);
+//
+//		for (int j = 0; j < 30; j++) {
+//			printf("*");
+//		}
+//		printf("\n");
+//
+//		gotoxy(5, 10);
+//		printf("  %d 탈락자명단:   %d \n", i, p);
+//		
+//		/*for (int j = 0; j < n_player; j++) {
+//			if(move_player[j]==true)
+//				printf(" %d ", j);
+//		}*/
+//
+//		gotoxy(6, 10);
+//		for (int j = 0; j < 30; j++) {
+//			printf("*");
+//		}
+//
+//		Sleep(1000);
+//	}
+//
+//	for (j = 0; j < 3; j++) {
+//		for (i = 4; i <= 6; i++) {
+//			gotoxy(i, 10);
+//			printf("                              \n");
+//		}
+//	}
+//}
 
 
 void younghyee_print()
@@ -78,7 +116,7 @@ void younghyee_print()
 
 void mugunghwa_init(void)
 {
-	map_init(n_player + 4, 60);
+	map_init(n_player + 4, 45);
 
 	younghyee_print();
 
@@ -88,7 +126,7 @@ void mugunghwa_init(void)
 		if (pass_player[i] == true || player[i] == false) continue;
 		px[i] = x;
 		py[i] = y;
-		period[i] = randint(100, 400);
+		period[i] = randint(400, 500);	//
 
 		back_buf[px[i]][py[i]] = '0' + i; 
 		x++;
@@ -103,7 +141,7 @@ int get_rand(bool move, bool stop)
 	double dr = r * 100.0f;
 
 	double p1[4] = { 10.0f, 10.0f, 10.0f, 70.0f };
-	double p2[2] = { 50.0f, 50.0f};	//ghkrfbf
+	double p2[2] = { 10.0f, 90.0f};	
 
 	double cumulative = 0.0f;
 
@@ -173,7 +211,7 @@ void Say_mugunghwa()
 		}
 	}
 	else if (s < 6) {
-		if (tick % (60 + 20 * s) == 0) { //
+		if (tick % (600 + 200 * s) == 0) { //
 			gotoxy(N_ROW, s*3);
 			printf("%s ", say[s]);
 			s++;
@@ -223,9 +261,7 @@ bool move_check(int p)
 		if (behind_move(p) == true) return;
 		player[p] = false;
 		move_player[p] = true;
-		//
-		gotoxy(20+p, 0);
-		return printf("%d 플레이어 움직임 적발\n", p);
+		n_alive--;
 	}
 }
 
@@ -265,8 +301,15 @@ void mugunghwa(void)
 
 		if (young_change == true) {
 			move_check(0);
-			
+			if(move_player[0]==true)
+				mugunghwa_dialog(0);
+
+			if (move_player[0] == true) {
+				back_buf[px[0]][py[0]] = ' ';
+				px[0] = 0; py[0] = 0;
+			}
 		}
+		
 		// 영희가 뒤를 돌아봤을 때
 		if (young_change == true && move_1 == false) {
 
@@ -278,7 +321,6 @@ void mugunghwa(void)
 				if (pass_player[i] == true) continue;
 				if (move_player[i] == true) {
 					death_count++;
-					//printf("%d번 플레이어 움직임\n", i);
 				}
 			}
 
@@ -292,11 +334,13 @@ void mugunghwa(void)
 		if (young_change == true && death_count > 0) {
 
 			for (int i = 0; i < n_player; i++) {
-				if(move_player[i]==true)
-					mugunghwa_dialog(i);
+				if (player[i] == false) {
+					died[i] = i;
+				}
 			}
-		
-
+			
+			mugunghwa_dialog(died);
+			
 			death_count = 0;
 			tick = 0;
 
@@ -316,22 +360,15 @@ void mugunghwa(void)
 			if ((px[i] == young_x + 3 || px[i] == young_x - 1) && py[i] == young_y ||
 				(py[i] == young_y + 1 && (px[i] == young_x || px[i] == young_x + 1 || px[i] == young_x + 2))) {
 				pass_player[i] = true;
-				px[i] = 0, py[i] = 0;
 
-				next_game = true;
-				Sleep(1500);
+				//Sleep(500);
+				back_buf[px[i]][py[i]] = ' ';
+				px[i] = 0; py[i] = 0;
+
+				live_count++;
 			}
 		}
 
-		if (next_game == true) {
-			s = 0;
-			return mugunghwa();
-		}
-
-		for (int i = 0; i < n_player; i++) {
-			if (player[i] == true) alive_player++; 
-		}
-		if (alive_player == 1) break;
-		alive_player = 0;
+		if (live_count == n_alive) break;
 	}
 }
