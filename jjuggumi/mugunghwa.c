@@ -18,6 +18,45 @@ bool pass_player[PLAYER_MAX] = { 0 };
 int death_count = 0;
 bool move_1 = false;
 bool move_player[PLAYER_MAX] = { 0 };
+int alive_player=0;
+
+
+void mugunghwa_dialog(int player) {
+	int i, j;
+	int p = player;
+
+	for (i = DIALOG_DURATION_SEC; i > 0; i--) {
+		gotoxy(4, 10);
+
+		for (int j = 0; j < 30; j++) {
+			printf("*");
+		}
+		printf("\n");
+
+		gotoxy(5, 10);
+		printf("  %d 탈락자명단:   %d \n", i, p);
+		
+		/*for (int j = 0; j < n_player; j++) {
+			if(move_player[j]==true)
+				printf(" %d ", j);
+		}*/
+
+		gotoxy(6, 10);
+		for (int j = 0; j < 30; j++) {
+			printf("*");
+		}
+
+		Sleep(1000);
+	}
+
+	for (j = 0; j < 3; j++) {
+		for (i = 4; i <= 6; i++) {
+			gotoxy(i, 10);
+			printf("                                    \n");
+		}
+	}
+}
+
 
 void younghyee_print()
 {
@@ -64,7 +103,7 @@ int get_rand(bool move, bool stop)
 	double dr = r * 100.0f;
 
 	double p1[4] = { 10.0f, 10.0f, 10.0f, 70.0f };
-	double p2[2] = { 10.0f, 90.0f};
+	double p2[2] = { 50.0f, 50.0f};	//ghkrfbf
 
 	double cumulative = 0.0f;
 
@@ -124,20 +163,18 @@ int s = 0;
 void Say_mugunghwa()
 {
 	char* say[10] = { "무", "궁", "화", "꽃", "이", "피", "었", "습", "니", "다" };
-	//gotoxy(N_ROW, 0);
-
 
 	if (s >= 6 && s < 10) {
-		if (tick % 100 * s == 0) {
-			gotoxy(N_ROW, s * 2);
+		if (tick % 50 * (10-s) == 0) {	//
+			gotoxy(N_ROW, s *3);
 			printf("%s ", say[s]);
 			s++;
 			tick = 0;
 		}
 	}
 	else if (s < 6) {
-		if (tick % (800 + 200 * s) == 0) { 
-			gotoxy(N_ROW, s*2);
+		if (tick % (60 + 20 * s) == 0) { //
+			gotoxy(N_ROW, s*3);
 			printf("%s ", say[s]);
 			s++;
 			tick = 0;
@@ -151,6 +188,10 @@ void Say_mugunghwa()
 			tick = 0;
 			young_change = false;
 			move_1 = false;
+
+			for (int i = 0; i <= 30; i++) {
+				printxy(' ', N_ROW, i);
+			}
 		}
 	}
 }
@@ -175,12 +216,16 @@ bool behind_move(int p)
 
 bool move_check(int p)
 {
+	key_t key = get_key();
 	move_player[p] = false;
 
-	if (front_buf[px[p]][py[p]] != back_buf[px[p]][py[p]]) {
+	if (front_buf[px[p]][py[p]] != back_buf[px[p]][py[p]] || key != K_UNDEFINED) {
 		if (behind_move(p) == true) return;
 		player[p] = false;
 		move_player[p] = true;
+		//
+		gotoxy(20+p, 0);
+		return printf("%d 플레이어 움직임 적발\n", p);
 	}
 }
 
@@ -218,11 +263,14 @@ void mugunghwa(void)
 			}
 		}
 
+		if (young_change == true) {
+			move_check(0);
+			
+		}
 		// 영희가 뒤를 돌아봤을 때
 		if (young_change == true && move_1 == false) {
-			move_1 = true;		//한 번만 움직이게
 
-			for (int i = 0; i < n_player; i++) {
+			for (int i = 1; i < n_player; i++) {
 				move_check(i);
 			}
 
@@ -230,8 +278,11 @@ void mugunghwa(void)
 				if (pass_player[i] == true) continue;
 				if (move_player[i] == true) {
 					death_count++;
+					//printf("%d번 플레이어 움직임\n", i);
 				}
 			}
+
+			move_1 = true;		//한 번만 움직이게
 		}
 
 		display();
@@ -239,11 +290,14 @@ void mugunghwa(void)
 		tick += 10;
 		
 		if (young_change == true && death_count > 0) {
-			move_1 = false;
+
+			for (int i = 0; i < n_player; i++) {
+				if(move_player[i]==true)
+					mugunghwa_dialog(i);
+			}
+		
+
 			death_count = 0;
-
-			//dialog();
-
 			tick = 0;
 
 			for (int i = 0; i < n_player; i++) {
@@ -273,5 +327,11 @@ void mugunghwa(void)
 			s = 0;
 			return mugunghwa();
 		}
+
+		for (int i = 0; i < n_player; i++) {
+			if (player[i] == true) alive_player++; 
+		}
+		if (alive_player == 1) break;
+		alive_player = 0;
 	}
 }

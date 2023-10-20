@@ -7,6 +7,8 @@
 #define ROW_MAX		40
 #define COL_MAX		80
 
+#define DIALOG_DURATION_SEC		4
+
 // 더블 버퍼링
 // back_buf[][]가 맵이고, 
 // front_buf[][]는 화면에 출력하기 위한 정보

@@ -1,7 +1,7 @@
 #include "jjuggumi.h"
 #include "canvas.h"
 
-#define DIALOG_DURATION_SEC		4
+
 
 void draw(void);
 void print_status(void);
@@ -74,6 +74,65 @@ void print_status(void) {
 	}
 }
 
-void dialog(char message[]) {
+//void dialog(char message[]) {
+//	int remaining_time = DIALOG_DURATION_SEC;
+//	while (remaining_time >= 0) {
+//		// 현재 맵과 상태를 백업
+//		char backup[20][10];
+//		for (int row = 0; row < N_ROW; row++) {
+//			for (int col = 0; col < N_COL; col++) {
+//				backup[row][col] = back_buf[row][col];
+//			}
+//		}
+//
+//		// 남은 시간과 메시지 출력
+//		gotoxy(N_ROW / 2, N_COL / 2 - strlen(message) / 2);
+//		printf("Remaining time: %d seconds", remaining_time);
+//		gotoxy(N_ROW / 2 + 1, N_COL / 2 - strlen(message) / 2);
+//		printf("%s", message);
+//
+//		// 1초 대기
+//		Sleep(1000);
+//		remaining_time--;
+//
+//		// 복구
+//		for (int row = 0; row < N_ROW; row++) {
+//			for (int col = 0; col < N_COL; col++) {
+//				back_buf[row][col] = backup[row][col];
+//			}
+//		}
+//		display();
+//	}
+//}
 
+void dialog(char message[]) {
+	int i, j;
+	int messageLength = strlen(message);
+
+	for (int i = DIALOG_DURATION_SEC; i > 0; i--) {
+		gotoxy(4, 10);
+
+		for (int j = 0; j < 20; j++) {
+			printf("*");
+		}
+		printf("\n");
+
+		gotoxy(5, 10);
+		printf("*       %d %s        *\n", i, message);
+
+		gotoxy(6, 10);
+		for (int j = 0; j < 20; j++) {
+			printf("*");
+		}
+
+		Sleep(1000);
+	}
+
+
+	for (j = 0; j < 3; j++) {
+		for (i = 4; i <= 6; i++) {
+			gotoxy(i, 10);
+			printf("                     \n");
+		}
+	}
 }
