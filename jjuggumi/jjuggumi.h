@@ -8,9 +8,31 @@
 #include <time.h>
 
 #define PLAYER_MAX		10
+#define ITEM_MAX		10
 
-bool player[PLAYER_MAX];  // 기본값 true, 탈락하면 false
+typedef struct {
+	char name[100];
+	int intel_buf, str_buf, stamina_buf;
+}ITEM;
+
+typedef struct {
+	int id;
+	char name[100];
+
+	//능력치: 지능, 힘, 스태미나
+	int intel, str, stamina;
+
+	//현재 상태
+	bool is_alive;
+	bool hasitem;
+	ITEM item;
+}PLAYER;
+
+
+PLAYER player[PLAYER_MAX];  // 기본값 true, 탈락하면 false
+ITEM item[ITEM_MAX];
 int n_player, n_alive;
+int n_item;
 int tick;  // 시계
 
 // 미니게임

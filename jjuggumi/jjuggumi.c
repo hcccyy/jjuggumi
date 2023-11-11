@@ -18,13 +18,38 @@ int randint(int low, int high) {
 int jjuggumi_init(void) {
 	srand((unsigned int)time(NULL));
 
-	printf("플레이어 수: ");
-	scanf_s("%d", &n_player);
-
-	n_alive = n_player;
-	for (int i = 0; i < n_player; i++) {
-		player[i] = true;
+	FILE* fp;
+	fopen_s(&fp, DATA_FILE, "r");
+	if (fp == NULL) {
+		return -1;
 	}
+
+	fscanf_s(fp, "%d", &n_player);
+	for (int i = 0; i < n_player; i++) {
+		PLAYER* p = &player[i];
+
+		fscanf_s(fp, "%s%d%d", p->name, (unsigned int)sizeof(p->name), &(p->intel), &(p->str));
+		p->stamina = 100;
+
+		//현재 상태
+		p->is_alive = true;
+		p->hasitem = false;
+		n_alive++;
+	}
+
+	fscanf_s(fp, "%d", &n_item);
+	for (int i = 0; i < n_item; i++) {
+		fscanf_s(fp, "%s%d%d%d", item[i].name, (unsigned int)sizeof(item[i].name), &(item[i].intel_buf), &(item[i].str_buf), &(item[i].stamina_buf));
+	}
+	
+	fclose(fp);
+
+	
+
+	//n_alive = n_player;
+	//for (int i = 0; i < n_player; i++) {
+	//	player[i] = true;
+	//}
 	return 0;
 }
 
@@ -54,7 +79,8 @@ void ending(void) {
 	int winner = -1; // 우승자의 인덱스, 초기에는 무승부(-1)로 설정
 
 	for (int i = 0; i < n_player; i++) {
-		if (player[i]) {
+		PLAYER* p = &player[i];
+		if (p->is_alive) {
 			if (winner == -1) {
 				winner = i; // 처음으로 살아남은 플레이어를 우승자로 설정
 			}
@@ -83,11 +109,11 @@ void ending(void) {
 int main(void) {
 
 	jjuggumi_init();
-	intro();
-	sample();
-	mugunghwa();
+	//intro();
+	//sample();
+	//mugunghwa();
 	//nightgame();
-	//juldarigi();
+	juldarigi();
 	ending();
 	//jebi();
 

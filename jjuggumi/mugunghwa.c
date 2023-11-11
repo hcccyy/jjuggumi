@@ -18,7 +18,7 @@ bool pass_player[PLAYER_MAX] = { 0 };
 int death_count = 0;
 bool move_1 = false;
 bool move_player[PLAYER_MAX] = { 0 };
-int alive_player=0;
+//int alive_player=0;
 int died[PLAYER_MAX];
 int live_count = 0;
 
@@ -37,8 +37,9 @@ void mugunghwa_dialog(int p[]) {
 		
 		printf("  %d 탈락자명단:", i);
 		for (int k = 0; k < n_player; k++) {
-			if (p[k] != 0) {
-				printf(" %d ", p[k]);
+			PLAYER* pn = &player[k];
+			if (pn->is_alive == 0) {
+				printf(" %d ", pn->is_alive);
 			}
 		}
 		printf("\n");
@@ -59,41 +60,6 @@ void mugunghwa_dialog(int p[]) {
 		}
 	}
 }
-
-//void mugunghwa_dialog(int player) {
-//	int i, j;
-//	int p = player;
-//	for (i = DIALOG_DURATION_SEC; i > 0; i--) {
-//		gotoxy(4, 10);
-//
-//		for (int j = 0; j < 30; j++) {
-//			printf("*");
-//		}
-//		printf("\n");
-//
-//		gotoxy(5, 10);
-//		printf("  %d 탈락자명단:   %d \n", i, p);
-//		
-//		/*for (int j = 0; j < n_player; j++) {
-//			if(move_player[j]==true)
-//				printf(" %d ", j);
-//		}*/
-//
-//		gotoxy(6, 10);
-//		for (int j = 0; j < 30; j++) {
-//			printf("*");
-//		}
-//
-//		Sleep(1000);
-//	}
-//
-//	for (j = 0; j < 3; j++) {
-//		for (i = 4; i <= 6; i++) {
-//			gotoxy(i, 10);
-//			printf("                              \n");
-//		}
-//	}
-//}
 
 
 void younghyee_print()
@@ -123,7 +89,8 @@ void mugunghwa_init(void)
 	//canvas.c map_init에서 문자 #->*
 	int x = 2, y = N_COL - 2;
 	for (int i = 0; i < n_player; i++) {
-		if (pass_player[i] == true || player[i] == false) continue;
+		PLAYER* pn = &player[i];
+		if (pass_player[i] == true || player->is_alive == false) continue;
 		px[i] = x;
 		py[i] = y;
 		period[i] = randint(400, 500);	//
@@ -234,16 +201,17 @@ void Say_mugunghwa()
 	}
 }
 
-bool behind_move(int p)
+bool behind_move(int back_p)
 {
 	int front, back;
 	for (int i = 0; i < n_player; i++) {
-		if (py[i] > py[p]) front = i, back = p;
-		else front = p, back = i;
+		PLAYER* p = &player[i];
+		if (py[i] > py[back_p]) front = i, back = back_p;
+		else front = back_p, back = i;
 
-		if (i != p && px[front] == px[back]) {
+		if (i != back_p && px[front] == px[back]) {
 			if (front_buf[px[back]][py[back]] != back_buf[px[back]][py[back]]) {
-				player[back] = true;
+				p->is_alive = true;
 				move_player[back] = false;
 				return true;
 			}
@@ -258,8 +226,9 @@ bool move_check(int p)
 	move_player[p] = false;
 
 	if (front_buf[px[p]][py[p]] != back_buf[px[p]][py[p]] || key != K_UNDEFINED) {
+		PLAYER* pn = &player[p];
 		if (behind_move(p) == true) return;
-		player[p] = false;
+		pn->is_alive = false;
 		move_player[p] = true;
 		n_alive--;
 	}
@@ -268,6 +237,7 @@ bool move_check(int p)
 
 void mugunghwa(void)	
 {
+	printf("무궁화 시작");
 	srand((unsigned int)time(NULL));
 	next_game = false;
 
@@ -288,7 +258,8 @@ void mugunghwa(void)
 			break;
 		}
 		else if (key != K_UNDEFINED) {
-			if (player[0] == false) continue;
+			PLAYER* p0 = &player[0];
+			if (p0->is_alive == false) continue;
 			move_manual(key);
 		}
 
@@ -334,7 +305,8 @@ void mugunghwa(void)
 		if (young_change == true && death_count > 0) {
 
 			for (int i = 0; i < n_player; i++) {
-				if (player[i] == false) {
+				PLAYER* pn = &player[i];
+				if (pn->is_alive == false) {
 					died[i] = i;
 				}
 			}

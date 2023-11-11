@@ -69,8 +69,13 @@ void draw(void) {
 
 void print_status(void) {
 	printf("no. of players left: %d\n", n_alive);
-	for (int p = 0; p < n_player; p++) {
-		printf("player %2d: %5s\n", p, player[p] ? "alive" : "DEAD");		
+	printf("			intl	str	stm\n");
+	for (int i = 0; i < n_player; i++) {
+		PLAYER* p = &player[i];
+		printf("player %2d: %5s", i, p->is_alive ? "alive" : "DEAD");	
+
+		//item buf
+		printf("	%d(+%d)	%d(+%d)	%3d%%\n", p->intel, p->item.intel_buf, p->str, p->item.str_buf, p->stamina);
 	}
 }
 

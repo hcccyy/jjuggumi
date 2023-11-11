@@ -10,7 +10,11 @@ bool is_valid(key_t key) {
 		K_DOWN,
 		K_LEFT,
 		K_RIGHT,		
-		K_QUIT
+		K_QUIT,
+		K_STRINCR,
+		K_STRDECR,
+		K_LIE_L,
+		K_LIE_R
 	};
 
 	for (int i = 0; i < N_KEY; i++) {
@@ -24,6 +28,7 @@ bool is_valid(key_t key) {
 // 키보드에서 입력 받은 키가 무슨 키인지 구분해서 리턴
 key_t get_key(void) {
 	if (!_kbhit()) {
+		//printf("Debug: undefined\n");
 		return K_UNDEFINED;
 	}
 
