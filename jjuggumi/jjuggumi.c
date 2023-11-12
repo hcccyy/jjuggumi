@@ -28,6 +28,9 @@ int jjuggumi_init(void) {
 	for (int i = 0; i < n_player; i++) {
 		PLAYER* p = &player[i];
 
+		//id = ¹øÈ£
+		p->id = i;
+
 		fscanf_s(fp, "%s%d%d", p->name, (unsigned int)sizeof(p->name), &(p->intel), &(p->str));
 		p->stamina = 100;
 
