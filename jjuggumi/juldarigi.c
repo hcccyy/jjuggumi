@@ -12,16 +12,22 @@ bool die_dialog[PLAYER_MAX] = { 0 };
 
 bool dropped_player[PLAYER_MAX] = { 0 };
 
-int center = 15;
+int center, jul;
 double master_str = 0;
 
 bool lie_work[2] = { 0 };
 bool lie_1[2] = { 0 };
 
 
+void juldarigi_line() {
+	back_buf[1][jul] = '-';
+	back_buf[1][jul + 1] = '-';
+	back_buf[1][jul - 1] = '-';
+}
+
 void player_pos() {
-	int even_y = n_player * 5 / 2 - 2, odd_y = n_player * 5 / 2 + 2;
-	int l_idx = 0, r_idx = 0;
+	int even_y = jul - 2, odd_y = jul + 2;
+
 
 	for (int i = 0; i < n_player; i++) {
 		PLAYER* p = &player[i];
@@ -43,17 +49,16 @@ void player_pos() {
 			odd_y++;
 		}
 	}
+
 }
 
 void juldarigi_init(void) {
 	map_init(3, n_player * 5);
-	back_buf[0][n_player * 5 / 2] = ' ';
-	back_buf[2][n_player * 5 / 2] = ' ';
+	back_buf[0][center] = ' ';
+	back_buf[2][center] = ' ';
 
 	//줄
-	back_buf[1][n_player * 5 / 2] = '-';
-	back_buf[1][n_player * 5 / 2 + 1] = '-';
-	back_buf[1][n_player * 5 / 2 - 1] = '-';
+	juldarigi_line();
 
 	//모든 플레이어 부활
 	for (int i = 0; i < n_player; i++) {
@@ -97,43 +102,24 @@ double vaild_str_sum() {
 int line_change() {
 	if (vaild_str_sum() < 0) {
 		if (lie_work[0] == true) {
-			center -= 2;
-
-			back_buf[0][center + 1] = '*';
-			back_buf[0][center + 2] = '*';
-			back_buf[2][center + 1] = '*';
-			back_buf[2][center + 2] = '*';
+			jul -= 2;
+			juldarigi_line();
 		}
 		else {
-			center -= 1;
-
-			back_buf[0][center + 1] = '*';
-			back_buf[2][center + 1] = '*';
+			jul -= 1;
+			juldarigi_line();
 		}
 	}
 	else {
 		if(lie_work[1]==true){
-			center += 2;
-
-			back_buf[0][center - 1] = '*';
-			back_buf[0][center - 2] = '*';
-			back_buf[2][center - 1] = '*';
-			back_buf[2][center - 2] = '*';
+			jul += 2;
+			juldarigi_line();
 		}
 		else {
-			center += 1;
-
-			back_buf[0][center - 1] = '*';
-			back_buf[2][center - 1] = '*';
+			jul += 1;
+			juldarigi_line();
 		}
 	}
-}
-//2개 합치는거 고민좀
-void juldarigi_hole() {
-	back_buf[0][center] = ' ';
-	back_buf[2][center] = ' ';
-
-	master_str = 0;
 }
 
 int die_player(PLAYER *p) {
@@ -141,6 +127,7 @@ int die_player(PLAYER *p) {
 	p->str /= 2;
 	p->hasitem = false;
 }
+
 
 void hole_die() {
 	for (int i = 0; i < n_player; i++) {
@@ -150,19 +137,37 @@ void hole_die() {
 			p->is_alive = false;
 			n_alive--;
 
-			if (i % 2 == 0) {
-				back_buf[px[i]][py[i]] = ' ';
-				back_buf[px[i]][py[i] - 1] = ' ';
-				back_buf[px[i]][py[i] - 2] = ' ';
-			}
-			else {
-				back_buf[px[i]][py[i]] = ' ';
-				back_buf[px[i]][py[i] + 1] = ' ';
-				back_buf[px[i]][py[i] + 2] = ' ';
-			}
-
+			back_buf[px[i]][py[i]] = ' ';
+			jul = 15;
+			
 			if (dropped_player[i] == 0) die_player(p);
 			Sleep(1000);
+		}
+		
+		//구멍을 지나갔을 때
+		if (i % 2 == 0) {
+			if (py[i] > center && die_dialog[i] == false) {
+				p->is_alive = false;
+				n_alive--;
+
+				back_buf[px[i]][py[i]] = ' ';
+				jul = 15;
+
+				if (dropped_player[i] == 0) die_player(p);
+				Sleep(1000);
+			}
+		}
+		else {
+			if (py[i] < center && die_dialog[i] == false) {
+				p->is_alive = false;
+				n_alive--;
+
+				back_buf[px[i]][py[i]] = ' ';
+				jul = 15;
+
+				if (dropped_player[i] == 0) die_player(p);
+				Sleep(1000);
+			}
 		}
 	}
 }
@@ -230,16 +235,33 @@ void juldarigi_dailog() {
 		printf("오른쪽 팀이 누웠습니다! 힘이 순간적으로 2배가 됩니다!\n");
 	}
 
+	//몇명 죽었는지, 해당턴에 죽은p, 프린트 위치
+	int die_1time = 0;
+	bool die_now[PLAYER_MAX] = {0};
+	int print_pos = 0;
 	for (int i = 0; i < n_player; i++) {
 		PLAYER* p = &player[i];
 
-		if (p->is_alive == false && die_dialog[i]==0) {
-			gotoxy(N_ROW + 2, 0);
-			printf("%d번 플레이어가 구멍에 빠졌습니다!\n", i);
+		if (p->is_alive == false && die_dialog[i] == false) {
+			die_1time++;
+			die_now[i] = true;
 
-			die_dialog[i] = 1;
+			die_dialog[i] = true;
 			tick = 10;
 		}
+	}
+	if (die_1time > 0) {
+		for (int i = 0; i < n_player; i++) {
+			if (die_now[i] == true) {
+				gotoxy(N_ROW + 2, print_pos);
+				printf("%d ", i);
+
+				die_now[i] = false;
+				print_pos += 2;
+			}
+		}
+		gotoxy(N_ROW + 2, die_1time * 2);
+		printf("번 플레이어가 구멍에 빠졌습니다!\n");
 	}
 
 	//다일로그 지우기
@@ -263,10 +285,24 @@ int winner_check() {
 	else return ING;
 }
 
+void line1_buf0() {	//버퍼 비우기
+	for (int i = 0; i < n_player; i++) {
+		PLAYER* p = &player[i];
+
+		back_buf[px[i]][py[i]] = ' ';
+	}
+
+	back_buf[1][jul] = ' ';
+	back_buf[1][jul + 1] = ' ';
+	back_buf[1][jul - 1] = ' ';
+	juldarigi_line();
+}
 
 tick = 10;
 void juldarigi(void) {
-	
+	jul = n_player * 5 / 2;
+	center = n_player * 5 / 2;
+
 	juldarigi_init();
 	system("cls");
 	display();
@@ -296,7 +332,9 @@ void juldarigi(void) {
 
 		if (tick % 1000 == 0) {	
 			line_change();
-			juldarigi_hole();
+			master_str = 0;	//마스터 조작 초기화
+			line1_buf0();
+			player_pos();
 
 			display();
 			
@@ -305,7 +343,6 @@ void juldarigi(void) {
 				lie_after();
 			}
 			hole_die();
-			player_pos();
 		}
 
 		display();
