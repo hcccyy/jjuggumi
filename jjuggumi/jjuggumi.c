@@ -115,8 +115,8 @@ int main(void) {
 	//intro();
 	//sample();
 	//mugunghwa();
-	//nightgame();
-	juldarigi();
+	nightgame();
+	//juldarigi();
 	ending();
 	//jebi();
 
