@@ -75,7 +75,8 @@ void print_status(void) {
 		printf("player %2d: %5s", i, p->is_alive ? "alive" : "DEAD");	
 
 		//item buf
-		printf("	%2d(+%d)	%2d(+%d)	%3d%%\n", p->intel, p->item.intel_buf, p->str, p->item.str_buf, p->stamina);
+		//printf("	%2d(+%d)	%2d(+%d)	%3d%%\n", p->intel, p->item.intel_buf, p->str, p->item.str_buf, p->stamina);
+		printf("	%2d(%s%d)	%2d(%s%d)	%3d%%\n", p->intel, p->item.intel_buf >= 0 ? ("+") : (""), p->item.intel_buf, p->str, p->item.str_buf >= 0 ? ("+") :(""), p->item.str_buf, p->stamina);
 	}
 }
 
