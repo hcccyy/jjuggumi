@@ -7,9 +7,13 @@
 
 
 char field[FIELD_SIZE_Y][FIELD_SIZE_X];
-int px[PLAYER_MAX], py[PLAYER_MAX]; // 플레이어 위치
+int px[PLAYER_MAX], py[PLAYER_MAX], period[PLAYER_MAX]; // 플레이어 위치
 int itemX[ITEM_MAX], itemY[ITEM_MAX]; // 아이템 위치
-int userPlayer = 0; // 사용자 플레이어 번호
+
+bool ignoreitem[PLAYER_MAX][ITEM_MAX] = { 0 };
+
+
+//int userPlayer = 0; // 사용자 플레이어 번호
 
 void nightgame_init() {
     map_init(FIELD_SIZE_Y, FIELD_SIZE_X);
@@ -18,7 +22,7 @@ void nightgame_init() {
     srand((unsigned int)time(NULL));
     for (int i = 0; i < n_item; ++i) {
         ITEM* tem = &item[i];
-        // 아이템 배치 로직
+
         int x, y;
         do {
             x = randint(1, (FIELD_SIZE_Y - 2));
@@ -29,7 +33,7 @@ void nightgame_init() {
         itemY[i] = y;
     }
 
-    // 플레이어 배치 (0번 플레이어는 사용자로 설정)
+    // 플레이어 배치, 주기
     for (int i = 0; i < n_player; ++i) {
         PLAYER* p = &player[i];
         int x, y;
@@ -43,31 +47,67 @@ void nightgame_init() {
 
             px[i] = x;
             py[i] = y;
-        }
-   
-        if (i == 0) {
-            userPlayer = 0; // 사용자 플레이어 번호 설정
+            period[i] = randint(100, 500);
         }
     }
 }
 
 
-void exchangeItem(PLAYER* p, ITEM* tem) {
-    // 플레이어가 교환할 때, 원래 갖고 있던 아이템과 바꿈
-    // = 원래 갖고 있던 아이템 떨굼
-    
-    //0번이 템을 먹으면 오류
+void getItem(PLAYER* p, ITEM* tem) {
+    strncpy_s(p->item.name, sizeof(p->item.name), tem->name, sizeof(tem->name));
     p->item.intel_buf = tem->intel_buf;
     p->item.str_buf = tem->str_buf;
     p->item.stamina_buf = tem->stamina_buf;
+}
 
+// 다일로그 출력 어케하지
+void removeDialog() {
+    if (tick % 1000 == 0) {
+        gotoxy(16, 0);
+        printf("                                                                       ");
+        gotoxy(17, 0);
+        printf("                                                                            ");
+    }
+}
+
+void exchangeItem(PLAYER* p, ITEM* tem, int new_itemX, int new_itemY) {
+    for (int j = 0; j < n_item; j++) {
+        ITEM* tem = &item[j];
+
+        if (strcmp(tem->name, p->item.name) == 0) {
+            //갖고있던 템 버리기
+            itemX[j] = new_itemX;
+            itemY[j] = new_itemY;
+
+            //버린 템 무시
+            ignoreitem[p->id][j] = true;
+            break;
+        }
+    }
+    printf("플레이어 %d가 아이템(%s)를 ", p->id, p->item.name);
+
+    //새로운 템 먹기
+    getItem(p, tem);
+    
+    for (int j = 0; j < n_item; j++) {
+        ITEM* tem = &item[j];
+
+        if (strcmp(tem->name, p->item.name) == 0) {
+            // 새로운 템 위치 초기화
+            itemX[j] = 0;
+            itemY[j] = 0;
+
+            break;
+        }
+    }
+    printf("아이템(%s)로 교환합니다!\n", p->item.name);
 }
 
 int calculateDistance(int x1, int y1, int x2, int y2) {
     return abs(x1 - x2) + abs(y1 - y2);
 }
 
-bool ignoreitem[PLAYER_MAX][ITEM_MAX] = { 0 };
+
 void playerItemInteraction(int PlayerNum) {
     PLAYER* p = &player[PlayerNum];
 
@@ -75,125 +115,124 @@ void playerItemInteraction(int PlayerNum) {
     for (int i = 0; i < n_item; i++) {
         ITEM* tem = &item[i];
         
-
-        if ((px[PlayerNum] == itemX[i] && abs(py[PlayerNum] - itemY[i]) == 1) ||
-            (py[PlayerNum] == itemY[i] && abs(px[PlayerNum] - itemX[i]) == 1)) {
+        if ((px[p->id] == itemX[i] && abs(py[p->id] - itemY[i]) == 1) ||
+            (py[p->id] == itemY[i] && abs(px[p->id] - itemX[i]) == 1)) {
 
             if (ignoreitem[PlayerNum][i] == true) continue;
 
             // player 아이템이 있을 때만 아이템 교환 또는 무시
             if (p->hasitem == true) {
                 // 플레이어가 아이템을 가지고 있을 때 교환 여부 묻기
-                if (PlayerNum == 0) {
-                    gotoxy(10, 0);
+                if (p->id == 0) {
+                    gotoxy(16, 0);
                     printf("플레이어 0은 아이템을 교환하시겠습니까? (y/n)\n");
                     char input;
-                    scanf_s("%c", &input, 1);
+                    scanf_s("%c", &input, 1); 
+                    getchar();
+
+                    Sleep(500);
+                    gotoxy(16, 0);
+                    printf("                                                                       ");
+                    gotoxy(17, 0);
+                    printf("          ");
 
                     if (input == 'y' || input == 'Y') {
-                        exchangeItem(px[0], py[0], itemX[i], itemY[i]);
-                        gotoxy(16, 0);
-                        printf("플레이어 0이 아이템을 교환합니다!\n");
+                        getItem(p, tem);
 
-                        back_buf[itemX[i]][itemY[i]] = ' ';
-                        itemX[i] = 0;
-                        itemY[i] = 0;
+                        gotoxy(17, 0);
+                        exchangeItem(p, tem, itemX[i], itemY[i]);
+                        tick = 10;
                     }
                     else {
                         gotoxy(16, 0);
-                        printf("플레이어 0이 아이템을 무시합니다.\n");
-                        ignoreitem[PlayerNum][i] = true;
+                        printf("플레이어 0이 아이템(%s)을 무시합니다.\n", p->item.name);
+                        tick = 10;
+
+                        ignoreitem[p->id][i] = true;
                     }
                 }
                 else {
-                    int random = rand() % 2+1;
+                    int random = rand() % 2;
                     if (random == 0) {
-                        gotoxy(16, 0);
-                        printf("플레이어 %d가 아이템을 교환합니다!\n", PlayerNum);
-
                         //ignoreitem 초기화
-                        for (int k = 0; k < n_item; k++) ignoreitem[PlayerNum][k] = false;
+                        for (int k = 0; k < n_item; k++) ignoreitem[p->id][k] = false;
 
-                        
-                        //교환이면 버퍼를 비우는게 아니라 지 템이랑 바꿔야함. 
-                        //exchangeItem();
-                        /*back_buf[itemX[i]][itemY[i]] = ' ';
-                        itemX[i] = 0;
-                        itemY[i] = 0;*/
+                        gotoxy(17, 0);
+                        exchangeItem(p, tem, itemX[i], itemY[i]);
+                        tick = 10;
+
                     }
                     else {
                         gotoxy(16, 0);
-                        printf("플레이어 %d가 아이템을 무시합니다.\n", PlayerNum);
-                        ignoreitem[PlayerNum][i] = true;
+                        printf("플레이어 %d가 아이템(%s)을 무시합니다.\n", p->id, p->item.name);
+                        tick = 10;
+
+                        ignoreitem[p->id][i] = true;
+
                     }
                 }
             }
             else {
-                gotoxy(16, 0);
-                printf("플레이어 %d가 아이템을 획득했습니다!\n", PlayerNum);
-                p->hasitem = true;
+                p->hasitem = true;                
+                getItem(p, tem);
 
-                exchangeItem(p, tem);
+                gotoxy(16, 0);
+                printf("플레이어 %d가 아이템(%s)을 획득했습니다!\n", PlayerNum, p->item.name);
+                tick = 10;
 
                 back_buf[itemX[i]][itemY[i]] = ' ';
                 itemX[i] = 0;
                 itemY[i] = 0;
             }
         }
-        //return p;
     }
-
-    
 }
 
 // 플레이어들을 이동하는 함수
-void movePlayers(int PlayerNum,int count) {
-    if (count % 5 == 0) {
-        int i = PlayerNum;
-        int minDistance = FIELD_SIZE_X + FIELD_SIZE_Y;
-        int closestItemX = 0, closestItemY = 0;
+// 맵에 템이 없으면 0,0 으로 감
+void movePlayers(int PlayerNum) {
+    int i = PlayerNum;
+    int minDistance = 100;
+    int closestItemX = 0, closestItemY = 0;
 
-        for (int j = 0; j < n_item; ++j) {
-            if (ignoreitem[PlayerNum][j] == true) {
-                printf("Debug: %d번이 %d번 아이템 무시\n", PlayerNum, j);
-                continue;
-            }
+    for (int j = 0; j < n_item; ++j) {
+        if (ignoreitem[PlayerNum][j] == true) continue;
+        if (itemX[j] == 0 && itemY[j] == 0) continue;
 
-            int distance = calculateDistance(px[PlayerNum], py[PlayerNum], itemX[j], itemY[j]);
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestItemX = itemX[j];
-                closestItemY = itemY[j];
-            }
+        int distance = calculateDistance(px[PlayerNum], py[PlayerNum], itemX[j], itemY[j]);
+        if (distance < minDistance) {
+            minDistance = distance;
+            closestItemX = itemX[j];
+            closestItemY = itemY[j];
         }
+    }
 
-        int dx = closestItemX - px[PlayerNum];
-        int dy = closestItemY - py[PlayerNum];
+    int dx = closestItemX - px[PlayerNum];
+    int dy = closestItemY - py[PlayerNum];
 
-        // 가장 가까운 아이템 방향으로 이동
-        if (abs(dx) > abs(dy)) {
-            if (dx > 0 && back_buf[px[i] + 1][py[i]] == ' ') {
-                back_buf[px[i]][py[i]] = ' ';
-                px[i]++;
-                back_buf[px[i]][py[i]] = '0' + i;
-            }
-            else if (dx < 0 && back_buf[px[i] - 1][py[i]] == ' ') {
-                back_buf[px[i]][py[i]] = ' ';
-                px[i]--;
-                back_buf[px[i]][py[i]] = '0' + i;
-            }
+    // 가장 가까운 아이템 방향으로 이동
+    if (abs(dx) > abs(dy)) {
+        if (dx > 0 && back_buf[px[i] + 1][py[i]] == ' ') {
+            back_buf[px[i]][py[i]] = ' ';
+            px[i]++;
+            back_buf[px[i]][py[i]] = '0' + i;
         }
-        else {
-            if (dy > 0 && back_buf[px[i]][py[i] + 1] == ' ') {
-                back_buf[px[i]][py[i]] = ' ';
-                py[i]++;
-                back_buf[px[i]][py[i]] = '0' + i;
-            }
-            else if (dy < 0 && back_buf[px[i]][py[i] - 1] == ' ') {
-                back_buf[px[i]][py[i]] = ' ';
-                py[i]--;
-                back_buf[px[i]][py[i]] = '0' + i;
-            }
+        else if (dx < 0 && back_buf[px[i] - 1][py[i]] == ' ') {
+            back_buf[px[i]][py[i]] = ' ';
+            px[i]--;
+            back_buf[px[i]][py[i]] = '0' + i;
+        }
+    }
+    else {
+        if (dy > 0 && back_buf[px[i]][py[i] + 1] == ' ') {
+            back_buf[px[i]][py[i]] = ' ';
+            py[i]++;
+            back_buf[px[i]][py[i]] = '0' + i;
+        }
+        else if (dy < 0 && back_buf[px[i]][py[i] - 1] == ' ') {
+            back_buf[px[i]][py[i]] = ' ';
+            py[i]--;
+            back_buf[px[i]][py[i]] = '0' + i;
         }
     }
 }
@@ -213,7 +252,7 @@ void hideCursor() {
 
 void nightgame() {
     n_item = n_player - 1;
-    //n_item = 10;
+    n_item = 7;
 
     hideCursor(); // 커서 숨기기
     nightgame_init();
@@ -222,7 +261,6 @@ void nightgame() {
     display();
 
     // 게임 루프
-    int count = 0;
     while (1) {
         key_t key = get_key();
         if (key == K_QUIT) {
@@ -234,31 +272,28 @@ void nightgame() {
             move_manual(key);
         }
 
-       
+        
         for (int i = 0; i < n_player; i++) {
             PLAYER* p = &player[i];
 
-            playerItemInteraction(i);
-            if (i == 0) continue;
-            movePlayers(i, count);
+            if (tick % period[i] < 10) {
+
+                if (i == 0) continue;
+                movePlayers(i);
+            }
         }
 
-        
-
-        //// 필드 갱신
-        //for (int i = 1; i < FIELD_SIZE_Y - 1; ++i) {
-        //    for (int j = 1; j < FIELD_SIZE_X - 1; ++j) {
-        //        setCursorPosition(j, i);
-        //        printf("%c", field[i][j]);
-        //    }
-        //}
-        
-        count++;
-        tick += 100;
-        Sleep(100);
 
         display();
-
+        tick += 10;
+        Sleep(10);
+        
+        for (int i = 0; i < n_player; i++) {
+            PLAYER* p = &player[i];
+            
+            playerItemInteraction(i);
+        }
+        removeDialog();
     }
     
 }
