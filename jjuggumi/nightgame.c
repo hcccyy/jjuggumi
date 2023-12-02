@@ -137,13 +137,8 @@ void playerItemInteraction(int PlayerNum) {
                     printf("          ");
 
                     if (input == 'y' || input == 'Y') {
-                        getItem(p, tem);
-
                         gotoxy(17, 0);
                         exchangeItem(p, tem, itemX[i], itemY[i]);
-
-                        //ignoreitem √ ±‚»≠
-                        for (int k = 0; k < n_item; k++) ignoreitem[p->id][k] = false;
 
                         tick = 10;
                     }
