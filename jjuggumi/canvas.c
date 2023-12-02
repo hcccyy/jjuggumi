@@ -52,7 +52,7 @@ bool placable(int row, int col) {
 void display(void) {
 	draw();
 
-	gotoxy(N_ROW + 4, 0);  // 추가로 표시할 정보가 있으면 맵과 상태창 사이의 빈 공간에 출력
+	gotoxy(N_ROW + 6, 0);  // 추가로 표시할 정보가 있으면 맵과 상태창 사이의 빈 공간에 출력
 	print_status();
 }
 
@@ -74,8 +74,6 @@ void print_status(void) {
 		PLAYER* p = &player[i];
 		printf("player %2d: %5s", i, p->is_alive ? "alive" : "DEAD");	
 
-		//item buf
-		//printf("	%2d(+%d)	%2d(+%d)	%3d%%\n", p->intel, p->item.intel_buf, p->str, p->item.str_buf, p->stamina);
 		printf("	%2d(%s%d)	%2d(%s%d)	%3d%%\n", p->intel, p->item.intel_buf >= 0 ? ("+") : (""), p->item.intel_buf, p->str, p->item.str_buf >= 0 ? ("+") :(""), p->item.str_buf, p->stamina);
 	}
 }
