@@ -141,11 +141,15 @@ void playerItemInteraction(int PlayerNum) {
 
                         gotoxy(17, 0);
                         exchangeItem(p, tem, itemX[i], itemY[i]);
+
+                        //ignoreitem 초기화
+                        for (int k = 0; k < n_item; k++) ignoreitem[p->id][k] = false;
+
                         tick = 10;
                     }
                     else {
                         gotoxy(16, 0);
-                        printf("플레이어 0이 아이템(%s)을 무시합니다.\n", p->item.name);
+                        printf("플레이어 0이 아이템(%s)을 무시합니다.\n", tem->name);
                         tick = 10;
 
                         ignoreitem[p->id][i] = true;
@@ -164,7 +168,7 @@ void playerItemInteraction(int PlayerNum) {
                     }
                     else {
                         gotoxy(16, 0);
-                        printf("플레이어 %d가 아이템(%s)을 무시합니다.\n", p->id, p->item.name);
+                        printf("플레이어 %d가 아이템(%s)을 무시합니다.\n", p->id, tem->name);
                         tick = 10;
 
                         ignoreitem[p->id][i] = true;

@@ -65,8 +65,10 @@ void juldarigi_init(void) {
 		PLAYER* p = &player[i];
 
 		if (p->is_alive == false) {
-			//탈락자 기록
+			//탈락자 기록 //왜하는 거지? 별추가할라고 했나?
 			dropped_player[i] = true;
+			//gotoxy(15 + i, 8);
+			//printf("*"); Sleep(500);
 
 			p->is_alive = true;
 			n_alive++;
