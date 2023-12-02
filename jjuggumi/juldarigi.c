@@ -11,6 +11,7 @@ int px[PLAYER_MAX], py[PLAYER_MAX], period[PLAYER_MAX];  // 각 플레이어 위치, 이
 bool die_dialog[PLAYER_MAX] = { 0 };
 
 bool dropped_player[PLAYER_MAX] = { 0 };
+bool star_present[PLAYER_MAX] = { 0 };
 
 int center, jul;
 double master_str = 0;
@@ -65,10 +66,11 @@ void juldarigi_init(void) {
 		PLAYER* p = &player[i];
 
 		if (p->is_alive == false) {
-			//탈락자 기록 //왜하는 거지? 별추가할라고 했나?
+			//탈락자 기록(죽으면 힘, 지능 하락)
 			dropped_player[i] = true;
-			//gotoxy(15 + i, 8);
-			//printf("*"); Sleep(500);
+
+			//별 표시
+			star_present[i] = true;
 
 			p->is_alive = true;
 			n_alive++;
@@ -175,7 +177,17 @@ void hole_die() {
 }
 
 void lie() {
-	if (lie_work[0] == true && lie_1[0] == false) {
+	if (lie_work[1] == true && lie_work[0] == true && lie_1[0] == false && lie_1[1] == false) {
+		for (int i = 0; i < n_player; i++) {
+			PLAYER* p = &player[i];
+
+			p->str *= 2;
+			lie_1[1] = true;
+			lie_1[0] = true;
+			printf("양쪽 다 누움!"); Sleep(1000);
+		}
+	}
+	else if (lie_work[0] == true && lie_1[0] == false) {
 		for (int i = 0; i < n_player; i++) {
 			PLAYER* p = &player[i];
 
@@ -195,10 +207,21 @@ void lie() {
 			}
 		}
 	}
+	
 }
 
 void lie_after() {
-	if (lie_work[0] == true) {
+	if (lie_work[0] && lie_work[1]) {
+		for (int i = 0; i < n_player; i++) {
+			PLAYER* p = &player[i];
+
+			p->str /= 2;
+			p->stamina -= (p->stamina * 0.3);
+
+			if (p->stamina <= 0) p->stamina = 0;
+		}
+	}
+	else if (lie_work[0] == true) {
 		for (int i = 0; i < n_player; i++) {
 			PLAYER* p = &player[i];
 
@@ -225,10 +248,26 @@ void lie_after() {
 
 	lie_work[0] = false;
 	lie_work[1] = false;
+	lie_1[0] = false;
+	lie_1[1] = false;
 }
 
 void juldarigi_dailog() {
-	if (lie_work[0] == true) {
+	//별 표시
+	for (int i = 0; i < n_player; i++) {
+		PLAYER* p = &player[i];
+
+		if (star_present[i] == 1) {
+			gotoxy(N_ROW + 8 + i, 16);
+			printf("*");
+		}
+	}
+	
+	if (lie_work[0] && lie_work[1]) {
+		gotoxy(N_ROW + 2, 0);
+		printf("양쪽팀이 누웠습니다! 모든 플레이어의 힘이 순간적으로 2배가 됩니다!\n");
+	}
+	else if (lie_work[0] == true) {
 		gotoxy(N_ROW + 2, 0);
 		printf("왼쪽 팀이 누웠습니다! 힘이 순간적으로 2배가 됩니다!\n");
 	}
@@ -266,10 +305,12 @@ void juldarigi_dailog() {
 		printf("번 플레이어가 구멍에 빠졌습니다!\n");
 	}
 
+
+
 	//다일로그 지우기
 	if (tick % 1000 == 0) {
 		gotoxy(N_ROW + 2, 0);
-		printf("                                                        ");
+		printf("                                                                             ");
 	}
 }
 
@@ -294,9 +335,12 @@ void line1_buf0() {	//버퍼 비우기
 		back_buf[px[i]][py[i]] = ' ';
 	}
 
-	back_buf[1][jul] = ' ';
+	/*back_buf[1][jul] = ' ';
 	back_buf[1][jul + 1] = ' ';
-	back_buf[1][jul - 1] = ' ';
+	back_buf[1][jul - 1] = ' ';*/
+	for (int i = 0; i < 10; i++) {
+		back_buf[1][jul - 5 + i] = ' ';
+	}
 	juldarigi_line();
 }
 
