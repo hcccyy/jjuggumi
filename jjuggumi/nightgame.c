@@ -6,6 +6,7 @@
 #define FIELD_SIZE_Y 14 // 필드 세로 크기
 
 
+
 char field[FIELD_SIZE_Y][FIELD_SIZE_X];
 int px[PLAYER_MAX], py[PLAYER_MAX], period[PLAYER_MAX]; // 플레이어 위치
 int itemX[ITEM_MAX], itemY[ITEM_MAX]; // 아이템 위치
@@ -14,6 +15,7 @@ bool ignoreitem[PLAYER_MAX][ITEM_MAX] = { 0 };
 bool ignoreplayer[PLAYER_MAX][PLAYER_MAX] = { 0 };
 
 //int userPlayer = 0; // 사용자 플레이어 번호
+
 
 void nightgame_init() {
     map_init(FIELD_SIZE_Y, FIELD_SIZE_X);
@@ -333,7 +335,6 @@ void persuasionAttempt(int player1, int player2) {
 
     // 회유 조건 확인
     if (intellPlayer1 > intellPlayer2) {
-        gotoxy(9, 32);
         printf("회유 시도 성공!\n");
 
         // 아이템 강탈 또는 교환
@@ -344,6 +345,7 @@ void persuasionAttempt(int player1, int player2) {
             ITEM temp = p1->item;
             p1->item = p2->item;
             p2->item = temp;
+            //exchangeItem2(p1, p2);
         }
         else if (p1->hasitem == false && p2->hasitem == true) {
             if (p1->id == 0) gotoxy(10, 32);
@@ -390,7 +392,6 @@ void interaction() {
                         gotoxy(3 + i, 32);
                         printf("                                                                      ");
                     }
-                    Sleep(500);
 
                     gotoxy(3, 32);
                     printf("플레이어 0과 플레이어 %d가 만났습니다.\n", j);
@@ -430,44 +431,123 @@ void interaction() {
                     gotoxy(17, 0);
                     // 다른 플레이어끼리의 상호작용
 
-                    printf("플레이어 %d과 플레이어 %d가 만났습니다.\n", i, j); Sleep(500);
-                    if (player[i].hasitem || player[j].hasitem) {
-                        if (!player[i].hasitem) {
-                            printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", i, j); Sleep(500);
-                            robberyAttempt(i, j);
-                        }
-                        else if (!player[j].hasitem) {
-                            printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", j, i); Sleep(500);
-                            robberyAttempt(j, i);
+                    printf("플레이어 %d과 플레이어 %d가 만났습니다.\n", i, j);
+                    Sleep(1000);
+
+                    int randomPlayer = rand() % 2; // 무작위 플레이어 선택
+                    int actionChoice = rand() % 3 + 1; // 1: 강탈 시도, 2: 회유 시도, 3: 무시
+
+                    switch (actionChoice) {
+                    case 1:
+                        if (player[i].hasitem || player[j].hasitem) {
+                            if (!player[i].hasitem) {
+                                printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", i, j);
+                                Sleep(1000);
+                                robberyAttempt(i, j);
+                            }
+                            else if (!player[j].hasitem) {
+                                printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", j, i);
+                                Sleep(1000);
+                                robberyAttempt(j, i);
+                            }
+                            else {
+                                int randomChoice = rand() % 2;
+                                if (randomChoice == 0) {
+                                    printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", i, j);
+                                    Sleep(1000);
+                                    robberyAttempt(i, j);
+                                }
+                                else {
+                                    printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", j, i);
+                                    Sleep(1000);
+                                    robberyAttempt(j, i);
+                                }
+                            }
                         }
                         else {
                             int randomChoice = rand() % 2;
                             if (randomChoice == 0) {
-                                printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", i, j); Sleep(500);
+                                printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.\n", i, j);
                                 robberyAttempt(i, j);
                             }
                             else {
-                                printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", j, i); Sleep(500);
+                                printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.\n", j, i);
                                 robberyAttempt(j, i);
                             }
                         }
-                    }
-                    else {
-                        int randomChoice = rand() % 2;
-                        if (randomChoice == 0) {
-                            printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.\n", i, j); Sleep(500);
-                            robberyAttempt(i, j);
+                        break;
+                    case 2:
+                        if (player[i].hasitem || player[j].hasitem) {
+                            if (!player[i].hasitem) {
+                                printf("플레이어 %d이(가) 플레이어 %d에게 회유 시도합니다.", i, j);
+                                Sleep(1000);
+                                persuasionAttempt(i, j);
+                            }
+                            else if (!player[j].hasitem) {
+                                printf("플레이어 %d이(가) 플레이어 %d에게 회유 시도합니다.", j, i);
+                                Sleep(1000);
+                                persuasionAttempt(j, i);
+                            }
+                            else {
+                                int randomChoice = rand() % 2;
+                                if (randomChoice == 0) {
+                                    printf("플레이어 %d이(가) 플레이어 %d에게 회유 시도합니다.", i, j);
+                                    Sleep(1000);
+                                    persuasionAttempt(i, j);
+                                }
+                                else {
+                                    printf("플레이어 %d이(가) 플레이어 %d에게 회유 시도합니다.", j, i);
+                                    Sleep(1000);
+                                    persuasionAttempt(j, i);
+                                }
+                            }
                         }
                         else {
-                            printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.\n", j, i); Sleep(500);
-                            robberyAttempt(j, i);
+                            int randomChoice = rand() % 2;
+                            if (randomChoice == 0) {
+                                printf("플레이어 %d이(가) 플레이어 %d에게 회유 시도합니다.\n", i, j);
+                                persuasionAttempt(i, j);
+                            }
+                            else {
+                                printf("플레이어 %d이(가) 플레이어 %d에게 회유 시도합니다.\n", j, i);
+                                persuasionAttempt(j, i);
+                            }
                         }
+                        break;
+                    case 3:
+                        if (randomPlayer == 0) {
+                            printf("플레이어 %d이(가) 상대를 무시합니다.\n", i);
+                            ignoreplayer[i][j] = true;
+                            ignoreplayer[j][i] = true;
+                        }
+                        else {
+                            printf("플레이어 %d이(가) 상대를 무시합니다.\n", j);
+                            ignoreplayer[j][i] = true;
+                            ignoreplayer[i][j] = true;
+                        }
+                        break;
+                    default:
+                        printf("잘못된 선택입니다. 행동을 취하지 않습니다.\n");
+                        break;
                     }
                 }
             }
         }
     }
 }
+
+
+void restoreStamina() {
+    // 게임 종료 시 모든 플레이어의 스태미나 40% 회복
+    for (int i = 0; i < n_player; i++) {
+        player[i].stamina += (100 - player[i].stamina) * 0.4; // 현재 스태미나의 40% 회복
+        // 최대 스태미너를 넘지 않도록 제한
+        if (player[i].stamina > 100) {
+            player[i].stamina = 100;
+        }
+    }
+}
+
 
 
 
@@ -485,7 +565,7 @@ void hideCursor() {
 
 void nightgame() {
     n_item = n_player - 1;
-    //n_item = 7;
+    n_item = 7;
 
     hideCursor(); // 커서 숨기기
     nightgame_init();
@@ -529,6 +609,7 @@ void nightgame() {
         interaction();
         remove_itemDialog();
         remove_robberyDialog();
+       
     }
-
+    restoreStamina();
 }
