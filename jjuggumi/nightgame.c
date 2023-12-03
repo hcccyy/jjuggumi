@@ -333,6 +333,7 @@ void persuasionAttempt(int player1, int player2) {
 
     // 회유 조건 확인
     if (intellPlayer1 > intellPlayer2) {
+        gotoxy(9, 32);
         printf("회유 시도 성공!\n");
 
         // 아이템 강탈 또는 교환
@@ -343,7 +344,6 @@ void persuasionAttempt(int player1, int player2) {
             ITEM temp = p1->item;
             p1->item = p2->item;
             p2->item = temp;
-            //exchangeItem2(p1, p2);
         }
         else if (p1->hasitem == false && p2->hasitem == true) {
             if (p1->id == 0) gotoxy(10, 32);
@@ -390,6 +390,7 @@ void interaction() {
                         gotoxy(3 + i, 32);
                         printf("                                                                      ");
                     }
+                    Sleep(500);
 
                     gotoxy(3, 32);
                     printf("플레이어 0과 플레이어 %d가 만났습니다.\n", j);
@@ -429,24 +430,24 @@ void interaction() {
                     gotoxy(17, 0);
                     // 다른 플레이어끼리의 상호작용
 
-                    printf("플레이어 %d과 플레이어 %d가 만났습니다.\n", i, j); Sleep(1000);
+                    printf("플레이어 %d과 플레이어 %d가 만났습니다.\n", i, j); Sleep(500);
                     if (player[i].hasitem || player[j].hasitem) {
                         if (!player[i].hasitem) {
-                            printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", i, j); Sleep(1000);
+                            printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", i, j); Sleep(500);
                             robberyAttempt(i, j);
                         }
                         else if (!player[j].hasitem) {
-                            printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", j, i); Sleep(1000);
+                            printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", j, i); Sleep(500);
                             robberyAttempt(j, i);
                         }
                         else {
                             int randomChoice = rand() % 2;
                             if (randomChoice == 0) {
-                                printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", i, j); Sleep(1000);
+                                printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", i, j); Sleep(500);
                                 robberyAttempt(i, j);
                             }
                             else {
-                                printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", j, i); Sleep(1000);
+                                printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", j, i); Sleep(500);
                                 robberyAttempt(j, i);
                             }
                         }
@@ -454,11 +455,11 @@ void interaction() {
                     else {
                         int randomChoice = rand() % 2;
                         if (randomChoice == 0) {
-                            printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.\n", i, j);
+                            printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.\n", i, j); Sleep(500);
                             robberyAttempt(i, j);
                         }
                         else {
-                            printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.\n", j, i);
+                            printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.\n", j, i); Sleep(500);
                             robberyAttempt(j, i);
                         }
                     }
@@ -484,7 +485,7 @@ void hideCursor() {
 
 void nightgame() {
     n_item = n_player - 1;
-    n_item = 7;
+    //n_item = 7;
 
     hideCursor(); // 커서 숨기기
     nightgame_init();

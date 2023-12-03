@@ -47,12 +47,6 @@ int jjuggumi_init(void) {
 	
 	fclose(fp);
 
-	
-
-	//n_alive = n_player;
-	//for (int i = 0; i < n_player; i++) {
-	//	player[i] = true;
-	//}
 	return 0;
 }
 
@@ -109,14 +103,27 @@ void ending(void) {
 	// 이후 게임을 종료하거나 다시 시작할 수 있도록 필요한 코드를 여기에 추가
 }
 
+void stamina_recov() {
+	for (int i = 0; i < n_player; i++) {
+		PLAYER* p = &player[i];
+
+		if (p->is_alive) {
+			p->stamina += (p->stamina * 0.5);
+			if (p->stamina > 100) {
+				p->stamina = 100;
+			}
+		}
+	}
+}
+
 int main(void) {
 
 	jjuggumi_init();
 	//intro();
 	//sample();
 	//mugunghwa();
-	//nightgame();
-	juldarigi();
+	nightgame();
+	//juldarigi();
 	ending();
 	//jebi();
 

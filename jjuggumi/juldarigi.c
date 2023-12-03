@@ -397,6 +397,9 @@ void juldarigi(void) {
 
 		juldarigi_dailog();
 
-		if (winner_check() != ING) break;
+		if (winner_check() != ING) { 
+			stamina_recov();
+			break; 
+		}
 	}
 }
