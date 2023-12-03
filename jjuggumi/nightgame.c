@@ -88,7 +88,7 @@ void exchangeItem(PLAYER* p, ITEM* tem, int new_itemX, int new_itemY) {
 
     //새로운 템 먹기
     getItem(p, tem);
-    
+
     for (int j = 0; j < n_item; j++) {
         ITEM* tem = &item[j];
 
@@ -114,7 +114,7 @@ void playerItemInteraction(int PlayerNum) {
     // 아이템 번호 확인
     for (int i = 0; i < n_item; i++) {
         ITEM* tem = &item[i];
-        
+
         if ((px[p->id] == itemX[i] && abs(py[p->id] - itemY[i]) == 1) ||
             (py[p->id] == itemY[i] && abs(px[p->id] - itemX[i]) == 1)) {
 
@@ -127,7 +127,7 @@ void playerItemInteraction(int PlayerNum) {
                     gotoxy(15, 0);
                     printf("플레이어 0은 아이템을 교환하시겠습니까? (y/n)>> ");
                     char input;
-                    scanf_s("%c", &input, 1); 
+                    scanf_s("%c", &input, 1);
                     getchar();
 
                     Sleep(500);
@@ -172,7 +172,7 @@ void playerItemInteraction(int PlayerNum) {
                 }
             }
             else {
-                p->hasitem = true;                
+                p->hasitem = true;
                 getItem(p, tem);
 
                 gotoxy(15, 0);
@@ -249,7 +249,7 @@ void clearItem(PLAYER* p) {
 void remove_robberyDialog() {
     if (tick % 1000 == 0) {
         for (int i = 0; i < 3; i++) {
-            gotoxy(17+i, 0);
+            gotoxy(17 + i, 0);
             printf("                                                                            ");
         }
     }
@@ -281,7 +281,7 @@ void robberyAttempt(int player1, int player2) {
         if (p1->hasitem && p2->hasitem) {
             if (p1->id == 0) gotoxy(10, 32);
             printf("아이템을 교환합니다.\n");
-            
+
             ITEM temp = p1->item;
             p1->item = p2->item;
             p2->item = temp;
@@ -321,40 +321,62 @@ void robberyAttempt(int player1, int player2) {
 
 
 // 회유 시도
-//void persuasionAttempt(int player1, int player2) {
-//    int intellPlayer1 = player[player1].intel;
-//    int intellPlayer2 = player[player2].intel;
-//
-//    // 회유 조건 확인
-//    if (intellPlayer1 > intellPlayer2) {
-//        printf("회유 시도 성공!\n");
-//
-//        // 아이템 강탈 또는 교환
-//        if (player[player2].hasitem) {
-//            printf("아이템을 교환합니다.\n");
-//            ITEM temp = player[player1].item;
-//            player[player1].item = player[player2].item;
-//            player[player2].item = temp;
-//        }
-//        else {
-//            printf("아이템을 강탈합니다.\n");
-//            player[player1].item = player[player2].item;
-//            player[player2].item = emptyItem;
-//        }
-//
-//        printf("스태미나를 20%% 소모했습니다.\n");
-//        player[player1].stamina -= 20;
-//    }
-//    else {
-//        printf("회유 시도 실패!\n");
-//        printf("스태미나를 40%% 소모했습니다.\n");
-//        player[player1].stamina -= 40;
-//    }
-//    // 스태미나가 0 이하인 경우 0으로 설정
-//    if (player[player1].stamina < 0) {
-//        player[player1].stamina = 0;
-//    }
-//}
+void persuasionAttempt(int player1, int player2) {
+    PLAYER* p1 = &player[player1];
+    PLAYER* p2 = &player[player2];
+
+    ITEM* i1 = &p1->item;
+    ITEM* i2 = &p2->item;
+     
+    int intellPlayer1 = p1->intel * (p1->stamina * 0.01);
+    int intellPlayer2 = p2->intel * (p2->stamina * 0.01);
+
+    // 회유 조건 확인
+    if (intellPlayer1 > intellPlayer2) {
+        printf("회유 시도 성공!\n");
+
+        // 아이템 강탈 또는 교환
+        if (p1->hasitem && p2->hasitem) {
+            if (p1->id == 0) gotoxy(10, 32);
+            printf("아이템을 교환합니다.\n");
+
+            ITEM temp = p1->item;
+            p1->item = p2->item;
+            p2->item = temp;
+            //exchangeItem2(p1, p2);
+        }
+        else if (p1->hasitem == false && p2->hasitem == true) {
+            if (p1->id == 0) gotoxy(10, 32);
+            printf("아이템(%s)을 강탈합니다.\n", i2->name);
+
+            getItem(p1, i2);
+            clearItem(p2);
+
+        }
+
+        else {
+            if (p1->id == 0) gotoxy(10, 32);
+            printf("강탈할 것이 없습니다...\n");
+        }
+        if (p1->id == 0) gotoxy(11, 32);
+        printf("스태미나를 20%% 소모했습니다.\n");
+        p1->stamina -= (p1->stamina * 0.2);
+    }
+    else {
+        if (p1->id == 0) gotoxy(9, 32);
+        printf("회유 시도 실패!\n");
+        if (p1->id == 0) gotoxy(10, 32);
+        printf("스태미나를 40%% 소모했습니다.\n");
+        p1->stamina -= (p1->stamina * 0.4);
+    }
+    // 스태미나가 0 이하인 경우 0으로 설정
+    if (p1->stamina < 0) {
+        p1->stamina = 0;
+    }
+
+    ignoreplayer[p1->id][p2->id] = true;
+    ignoreplayer[p2->id][p1->id] = true;
+}
 
 // 상호작용
 void interaction() {
@@ -390,7 +412,7 @@ void interaction() {
 
                         break;
                     case 2:
-                        //persuasionAttempt(i, j);
+                        persuasionAttempt(i, j);
                         break;
                     case 3:
                         gotoxy(8, 32);
@@ -466,7 +488,7 @@ void nightgame() {
 
     hideCursor(); // 커서 숨기기
     nightgame_init();
-    
+
     system("cls");
     display();
 
@@ -482,7 +504,7 @@ void nightgame() {
             move_manual(key);
         }
 
-        
+
         for (int i = 0; i < n_player; i++) {
             PLAYER* p = &player[i];
 
@@ -497,15 +519,15 @@ void nightgame() {
         display();
         tick += 10;
         Sleep(10);
-        
+
         for (int i = 0; i < n_player; i++) {
             PLAYER* p = &player[i];
-            
+
             playerItemInteraction(i);
         }
         interaction();
         remove_itemDialog();
         remove_robberyDialog();
     }
-    
+
 }
