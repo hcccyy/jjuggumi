@@ -335,6 +335,7 @@ void persuasionAttempt(int player1, int player2) {
 
     // 회유 조건 확인
     if (intellPlayer1 > intellPlayer2) {
+        if (p1->id == 0) gotoxy(9, 32);
         printf("회유 시도 성공!\n");
 
         // 아이템 강탈 또는 교환
@@ -423,6 +424,7 @@ void interaction() {
                         ignoreplayer[j][i] = true;
                         break;
                     default:
+                        gotoxy(8, 32);
                         printf("잘못된 선택입니다. 행동을 취하지 않습니다.\n");
                         break;
                     }
@@ -547,8 +549,6 @@ void restoreStamina() {
         }
     }
 }
-
-
 
 
 void setCursorPosition(int x, int y) {

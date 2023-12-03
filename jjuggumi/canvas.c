@@ -116,7 +116,7 @@ void dialog(char message[]) {
 	for (int i = DIALOG_DURATION_SEC; i > 0; i--) {
 		gotoxy(4, 10);
 
-		for (int j = 0; j < 20; j++) {
+		for (int j = 0; j < 12; j++) {
 			printf("*");
 		}
 		printf("\n");
@@ -125,7 +125,7 @@ void dialog(char message[]) {
 		printf("*       %d %s        *\n", i, message);
 
 		gotoxy(6, 10);
-		for (int j = 0; j < 20; j++) {
+		for (int j = 0; j < 12; j++) {
 			printf("*");
 		}
 
@@ -136,7 +136,7 @@ void dialog(char message[]) {
 	for (j = 0; j < 3; j++) {
 		for (i = 4; i <= 6; i++) {
 			gotoxy(i, 10);
-			printf("                     \n");
+			printf("                   \n");
 		}
 	}
 }

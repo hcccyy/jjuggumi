@@ -39,7 +39,7 @@ void mugunghwa_dialog(int p[]) {
 		for (int k = 0; k < n_player; k++) {
 			PLAYER* pn = &player[k];
 			if (pn->is_alive == 0) {
-				printf(" %d ", pn->is_alive);
+				printf(" %d ", pn->id);
 			}
 		}
 		printf("\n");
@@ -93,7 +93,7 @@ void mugunghwa_init(void)
 		if (pass_player[i] == true || player->is_alive == false) continue;
 		px[i] = x;
 		py[i] = y;
-		period[i] = randint(400, 500);	//
+		period[i] = randint(600, 1000);	//
 
 		back_buf[px[i]][py[i]] = '0' + i; 
 		x++;
@@ -157,6 +157,8 @@ void enemy_move_manual(int player) {
 		}
 	}
 
+	if (py[p] == 1) dir = DIR_DOWN;
+
 	nx = px[p] + dx[dir];
 	ny = py[p] + dy[dir];
 	if (!placable(nx, ny)) return;
@@ -188,7 +190,7 @@ void Say_mugunghwa()
 
 	if (s == 10) {
 		young_change = true;
-		if (tick >= 2990) {
+		if (tick >= 2090) {	//¹Ù²Þ
 			s = 0;
 			tick = 0;
 			young_change = false;
