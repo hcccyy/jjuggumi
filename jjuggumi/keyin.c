@@ -14,7 +14,8 @@ bool is_valid(key_t key) {
 		K_STRINCR,
 		K_STRDECR,
 		K_LIE_L,
-		K_LIE_R
+		K_LIE_R,
+		K_SPACE
 	};
 
 	for (int i = 0; i < N_KEY; i++) {

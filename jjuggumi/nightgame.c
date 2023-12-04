@@ -444,24 +444,24 @@ void interaction() {
                         if (player[i].hasitem || player[j].hasitem) {
                             if (!player[i].hasitem) {
                                 printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", i, j);
-                                Sleep(1000);
+                                Sleep(500);
                                 robberyAttempt(i, j);
                             }
                             else if (!player[j].hasitem) {
                                 printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", j, i);
-                                Sleep(1000);
+                                Sleep(500);
                                 robberyAttempt(j, i);
                             }
                             else {
                                 int randomChoice = rand() % 2;
                                 if (randomChoice == 0) {
                                     printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", i, j);
-                                    Sleep(1000);
+                                    Sleep(500);
                                     robberyAttempt(i, j);
                                 }
                                 else {
                                     printf("플레이어 %d이(가) 플레이어 %d에게 강탈 시도합니다.", j, i);
-                                    Sleep(1000);
+                                    Sleep(500);
                                     robberyAttempt(j, i);
                                 }
                             }
@@ -482,24 +482,24 @@ void interaction() {
                         if (player[i].hasitem || player[j].hasitem) {
                             if (!player[i].hasitem) {
                                 printf("플레이어 %d이(가) 플레이어 %d에게 회유 시도합니다.", i, j);
-                                Sleep(1000);
+                                Sleep(500);
                                 persuasionAttempt(i, j);
                             }
                             else if (!player[j].hasitem) {
                                 printf("플레이어 %d이(가) 플레이어 %d에게 회유 시도합니다.", j, i);
-                                Sleep(1000);
+                                Sleep(500);
                                 persuasionAttempt(j, i);
                             }
                             else {
                                 int randomChoice = rand() % 2;
                                 if (randomChoice == 0) {
                                     printf("플레이어 %d이(가) 플레이어 %d에게 회유 시도합니다.", i, j);
-                                    Sleep(1000);
+                                    Sleep(500);
                                     persuasionAttempt(i, j);
                                 }
                                 else {
                                     printf("플레이어 %d이(가) 플레이어 %d에게 회유 시도합니다.", j, i);
-                                    Sleep(1000);
+                                    Sleep(500);
                                     persuasionAttempt(j, i);
                                 }
                             }

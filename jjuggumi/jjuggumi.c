@@ -119,13 +119,13 @@ void stamina_recov() {
 int main(void) {
 
 	jjuggumi_init();
-	//intro();
-	//sample();
+	intro();
+	sample();
 	mugunghwa();
 	nightgame();
 	juldarigi();
+	jebi();
 	ending();
-	//jebi();
 
 	return 0;
 }

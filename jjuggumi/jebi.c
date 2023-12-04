@@ -20,7 +20,7 @@ void jebi_init(void) {
 
 		x = 2;
 		y = 2 + (n * 3);
-
+		
 		PLAYER* p = &player[i];
 		if (p->is_alive == true) {
 			n++;
@@ -30,10 +30,10 @@ void jebi_init(void) {
 			back_buf[px[i]][py[i]] = '?';  // (0 .. n_player-1)
 		}
 		if (i == 0 && p->is_alive == true) {
-			back_buf[px[0]][py[0]] = '@';
+	back_buf[px[0]][py[0]] = '@';
 		}
 	}
-	
+
 
 	tick = 0;
 }
@@ -102,6 +102,7 @@ void jebi_dialog(int p, char message[]) {
 		for (int j = 0; j < 16; j++) {
 			printf("-");
 		}
+		printf("\n");
 
 		gotoxy(6, 2);
 		printf("| %d player %s |", p, message);
@@ -109,7 +110,7 @@ void jebi_dialog(int p, char message[]) {
 		gotoxy(7, 3);
 		for (int j = 0; j < 16; j++) {
 			printf("-");
-		}
+	}
 
 		Sleep(300);
 	}
@@ -124,6 +125,8 @@ void jebi(void) {
 	int fail = 0;
 	
 	while (1) {
+		//jebi_init();
+		//system("cls");
 		display();
 		if (s == 0) {
 			fail = randint(0, n_alive - 1);
@@ -144,6 +147,7 @@ void jebi(void) {
 					p->is_alive = false;
 					jebi_dialog(i, "Ε»¶τ!");
 					n_alive--;
+					jebi_dialog("Ε»¶τ!");
 				}
 				else if(p->is_alive == true) {
 					jebi_dialog(i, "Ελ°ϊ!");
